@@ -11,7 +11,7 @@ This document outlines the technical specifications and requirements for the CST
 |-----------|------------------|---------|
 | **Server Framework** | Python + Flask | Build REST API and backend logic |
 | **API Type** | Flask-SocketIO | Enable WebSocket for real-time updates |
-| **Authentication** | Microsoft OAuth2/Azure Active Directory | Secure user login and session control |
+| **Authentication** | Google OAuth2 | Secure user login and session control |
 | **Alert Trigger** | Azure Functions (Python) | Send alerts when thresholds are crossed |
 | **Error Handling** | Python try/except + logging | Catch runtime errors and maintain logs |
 | **Testing** | Postman, Pytest | Validate API endpoints and alert behavior |
@@ -26,8 +26,8 @@ This document outlines the technical specifications and requirements for the CST
 | **Languages** | HTML, CSS, JavaScript | Build interactive user dashboard |
 | **Charts/Graphs** | Chart.js | Visualize sensor data per room |
 | **Real-Time Feed** | Socket.io Client (JavaScript) | Receive live updates from backend |
-| **Authentication UI** | Microsoft OAuth2 | Integrate login on dashboard |
-| **Styling** | Tailwind CSS or Bootstrap | Create responsive and clean UI |
+| **Authentication UI** | Google OAuth2 | Integrate login on dashboard |
+| **Styling** | CSS with Font Awesome | Create responsive and clean UI |
 | **Testing** | Browser DevTools | Inspect, debug, and test UI components |
 
 ---
@@ -51,13 +51,31 @@ This document outlines the technical specifications and requirements for the CST
 
 ---
 
-## 🔐 AUTHENTICATION WITH MICROSOFT (MSAL)
+## 🔐 AUTHENTICATION WITH GOOGLE OAUTH2
 
-### Implementation Steps:
-1. **Register app in Azure Entra ID**
-2. **Set up MSAL.js in frontend** for sign-in
-3. **Configure backend** to validate JWT access tokens
-4. **Restrict certain routes** unless user is authenticated
+### Implementation Details:
+- **Frontend**: Google OAuth2 button with redirect to `/auth/google?prompt=select_account`
+- **Backend**: Flask with Authlib integration for Google OAuth
+- **Client ID**: `390952176863-3h63tpc9t7ot83srjdiagnhl2obtgef4.apps.googleusercontent.com`
+- **Session Management**: Flask-Session with filesystem storage
+- **User Flow**: Welcome screen → Google login → Dashboard
+
+### Google OAuth Setup:
+1. **Google Cloud Console**: OAuth2 credentials configured
+2. **Authorized Domains**: Localhost and production domains whitelisted
+3. **Scopes**: `openid email profile` for user information
+4. **Redirect URI**: `/auth/google/callback` endpoint handled by Flask
+
+### Authentication Flow:
+```
+Frontend → Google OAuth → Backend Validation → User Session → Dashboard Access
+```
+
+### Backend Endpoints:
+- `POST /auth/google` - Initiate OAuth flow
+- `GET /auth/google/callback` - Handle OAuth callback
+- `GET /api/userinfo` - Get current user information
+- `GET /logout` - Clear user session
 
 ---
 
@@ -138,10 +156,9 @@ Sensor Simulation → MQTT Broker → Flask Backend → MongoDB + WebSocket → 
 - pytest
 
 ### Frontend Libraries:
-- Chart.js
 - Socket.io Client
-- MSAL.js
-- Tailwind CSS / Bootstrap
+- Font Awesome
+- Google OAuth2
 
 ### Azure Services:
 - Azure App Service
