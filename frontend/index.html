@@ -245,12 +245,99 @@
       pointer-events: none;
       z-index: 1;
     }
+    .settings-section {
+      padding: 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .settings-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .settings-title {
+      font-size: 1.3rem;
+      color: #294e7a;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid #eee;
+    }
+    .setting-row:last-child {
+      border-bottom: none;
+    }
+    .setting-label {
+      font-weight: 500;
+      color: #333;
+    }
+    .setting-input {
+      width: 80px;
+      padding: 0.4rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      text-align: center;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 24px;
+      background: #ccc;
+      border-radius: 24px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .toggle-switch.active {
+      background: #4a76a8;
+    }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: 0.3s;
+    }
+    .toggle-switch.active::after {
+      left: 28px;
+    }
+    .save-btn {
+      background: #4a76a8;
+      color: white;
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 1rem;
+    }
+    .save-btn:hover {
+      background: #3a5f85;
+    }
+    .server-status-section button {
+      transition: all 0.3s ease;
+    }
+    .server-status-section button:hover {
+      opacity: 0.8;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
   </style>
 </head>
 <body>
       <div class="sidebar">
-      <i class="fa-solid fa-gauge nav-icon active" title="Dashboard" onclick="showSection('dashboard')"></i>
-      <i class="fa-solid fa-gear nav-icon" title="Settings" onclick="showSection('settings')"></i>
+      <i class="fa-solid fa-gauge nav-icon active" id="dashboard-icon" title="Dashboard" onclick="showSection('dashboard')"></i>
+      <i class="fa-solid fa-gear nav-icon" id="settings-btn" title="Settings" onclick="showSection('settings')" style="display: none;"></i>
       <i class="fa-solid fa-right-from-bracket nav-icon logout" id="sidebar-logout" title="Logout"></i>
     </div>
   <div class="main-content">
@@ -279,6 +366,32 @@
     </section>
 
     <main id="main-content" style="display:none;">
+      <!-- Server Status Section -->
+      <section class="server-status-section" style="padding: 1.5rem 2rem; background: #fff; margin: 1rem 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <h3 style="color: #294e7a; margin-bottom: 1rem; font-size: 1.2rem;">🔧 Server Status</h3>
+        <div style="display: flex; flex-wrap: wrap; gap: 2rem; align-items: center;">
+          <div>
+            <strong>Server Passkey:</strong>
+            <span id="server-passkey" style="font-weight: bold; color: #4a76a8; margin-left: 0.5rem;">(Fetching...)</span>
+          </div>
+          <div>
+            <button id="connect-btn" style="background: #4a76a8; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: bold;">Connect</button>
+            <button id="stop-btn" style="background: #d32f2f; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-weight: bold; display: none;">Stop Stream</button>
+          </div>
+          <div>
+            <p id="stream-status" style="font-weight: bold; margin: 0; color: #666; display: none;">
+              🟢 Streaming active
+            </p>
+          </div>
+          <div>
+            <p id="network-status" style="font-weight: bold; margin: 0; color: #666;">
+              🌐 Network Status: <span style="color: #888;">Checking...</span>
+            </p>
+          </div>
+        </div>
+        <p style="margin: 0.5rem 0 0 0; color: #666; font-size: 0.9rem;">Click "Connect" after the passkey appears to start streaming sensor data in real time.</p>
+      </section>
+
       <!-- Dashboard Section -->
       <section id="dashboard-section">
         <div class="dashboard">
@@ -324,6 +437,48 @@
           </div>
         </div>
       </section>
+
+      <!-- Settings Section -->
+      <section id="settings-section" style="display: none;">
+        <div class="settings-section">
+          <div class="settings-card">
+            <h3 class="settings-title">Alert Settings</h3>
+            
+            <div class="setting-row">
+              <span class="setting-label">Temperature Min (°C)</span>
+              <input type="number" class="setting-input" id="temp-min" value="19" min="0" max="50">
+            </div>
+            
+            <div class="setting-row">
+              <span class="setting-label">Temperature Max (°C)</span>
+              <input type="number" class="setting-input" id="temp-max" value="25" min="0" max="50">
+            </div>
+            
+            <div class="setting-row">
+              <span class="setting-label">Humidity Min (%)</span>
+              <input type="number" class="setting-input" id="humidity-min" value="35" min="0" max="100">
+            </div>
+            
+            <div class="setting-row">
+              <span class="setting-label">Humidity Max (%)</span>
+              <input type="number" class="setting-input" id="humidity-max" value="55" min="0" max="100">
+            </div>
+            
+            <div class="setting-row">
+              <span class="setting-label">CO Level Max (ppm)</span>
+              <input type="number" class="setting-input" id="co-max" value="3" min="0" max="50" step="0.1">
+            </div>
+            
+            <div class="setting-row">
+              <span class="setting-label">Notifications</span>
+              <div class="toggle-switch" id="notifications-toggle" onclick="toggleNotifications()">
+              </div>
+            </div>
+            
+            <button class="save-btn" onclick="saveSettings()">Save Settings</button>
+          </div>
+        </div>
+      </section>
     </main>
     <footer>
       &copy; 25S_CST8922_450 Group 1
@@ -331,6 +486,93 @@
   </div>
   <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
   <script>
+    // Global settings
+    let settings = {
+      temp: { min: 19, max: 25 },
+      humidity: { min: 35, max: 55 },
+      co: { max: 3 },
+      notifications: true
+    };
+
+    // Send notification
+    function sendNotification(message, room) {
+      if (settings.notifications && 'Notification' in window && Notification.permission === 'granted') {
+        new Notification(`🏠 Smart Home Alert`, {
+          body: `${room}: ${message}`,
+          requireInteraction: false
+        });
+      }
+    }
+
+    // Toggle notifications
+    function toggleNotifications() {
+      settings.notifications = !settings.notifications;
+      updateToggle();
+      if (settings.notifications && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+
+    // Update toggle appearance
+    function updateToggle() {
+      const toggle = document.getElementById('notifications-toggle');
+      if (settings.notifications) {
+        toggle.classList.add('active');
+      } else {
+        toggle.classList.remove('active');
+      }
+    }
+
+    // Show/hide sections
+    function showSection(section) {
+      document.getElementById('dashboard-section').style.display = section === 'dashboard' ? 'block' : 'none';
+      document.getElementById('settings-section').style.display = section === 'settings' ? 'block' : 'none';
+      
+      // Hide/show server status section based on current page
+      const serverStatusSection = document.querySelector('.server-status-section');
+      if (serverStatusSection) {
+        serverStatusSection.style.display = section === 'settings' ? 'none' : 'block';
+      }
+      
+      document.getElementById('dashboard-icon').classList.toggle('active', section === 'dashboard');
+      document.getElementById('settings-btn').classList.toggle('active', section === 'settings');
+      
+      if (section === 'settings') {
+        loadSettings();
+      }
+    }
+
+    // Load settings into form
+    function loadSettings() {
+      document.getElementById('temp-min').value = settings.temp.min;
+      document.getElementById('temp-max').value = settings.temp.max;
+      document.getElementById('humidity-min').value = settings.humidity.min;
+      document.getElementById('humidity-max').value = settings.humidity.max;
+      document.getElementById('co-max').value = settings.co.max;
+      updateToggle();
+    }
+
+    // Save settings
+    function saveSettings() {
+      settings.temp.min = parseFloat(document.getElementById('temp-min').value);
+      settings.temp.max = parseFloat(document.getElementById('temp-max').value);
+      settings.humidity.min = parseFloat(document.getElementById('humidity-min').value);
+      settings.humidity.max = parseFloat(document.getElementById('humidity-max').value);
+      settings.co.max = parseFloat(document.getElementById('co-max').value);
+
+      localStorage.setItem('smartHomeSettings', JSON.stringify(settings));
+      alert('Settings saved!');
+      showSection('dashboard');
+    }
+
+    // Load saved settings
+    function loadSavedSettings() {
+      const saved = localStorage.getItem('smartHomeSettings');
+      if (saved) {
+        settings = { ...settings, ...JSON.parse(saved) };
+      }
+    }
+
     // Sidebar logout
     document.getElementById('sidebar-logout').addEventListener('click', () => {
       fetch('/logout').then(() => window.location.reload());
@@ -353,14 +595,29 @@
 
     // Convert ISO date to human-readable time difference
     function timeAgo(isoString) {
-      if (!isoString) return "-";
-      const now = new Date();
-      const then = new Date(isoString);
-      const diff = Math.floor((now - then) / 1000);
-      if (diff < 60) return `Last updated just now`;
-      if (diff < 3600) return `Last updated ${Math.floor(diff/60)} min ago`;
-      if (diff < 86400) return `Last updated ${Math.floor(diff/3600)} hr ago`;
-      return `Last updated ${Math.floor(diff/86400)} day(s) ago`;
+      if (!isoString) return "Last updated -";
+
+      try {
+        const now = new Date();
+        const then = new Date(isoString);
+
+        // Check if the date is valid
+        if (isNaN(then.getTime())) {
+          return "Last updated -";
+        }
+
+        const diff = Math.floor((now - then) / 1000); // difference in seconds
+
+        if (diff < 10) return "Last updated just now";
+        if (diff < 60) return `Last updated ${diff} sec ago`;
+        if (diff < 3600) return `Last updated ${Math.floor(diff/60)} min ago`;
+        if (diff < 86400) return `Last updated ${Math.floor(diff/3600)} hr ago`;
+        if (diff < 604800) return `Last updated ${Math.floor(diff/86400)} day(s) ago`;
+        // Shows actual date for very old data
+        return `Last updated ${then.toLocaleDateString()}`;
+      } catch (error) {
+        return "Last updated -";
+      }
     }
 
     // User info and socket connection
@@ -368,77 +625,175 @@
       .then(res => res.json())
       .then(user => {
         if (user && user.name) {
-          // Show avatar and welcome only when logged in
+          loadSavedSettings();
+          if (settings.notifications && Notification.permission === 'default') {
+            Notification.requestPermission();
+          }
+
           document.getElementById('header-left').style.display = 'flex';
           document.getElementById('user-avatar').src =
             `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=4a76a8&color=fff&rounded=true&size=44`;
           document.getElementById('welcome-message').textContent =
             `${getGreeting()}, ${user.name}`;
-          document.getElementById('user-info').textContent = '';
           document.getElementById('auth-section').style.display = 'none';
           document.getElementById('main-content').style.display = 'block';
           document.getElementById('sidebar-logout').style.display = 'block';
+          document.getElementById('settings-btn').style.display = 'block';
 
           const socket = io();
 
-          // Connection status
-          socket.on('connection_status', (data) => {
-            console.log('Connection status:', data);
-          });
+          // Fetch server passkey and initialize server status
+          function showServerStatus() {
+            // Fetch passkey from get-passkey
+            fetch('/get-passkey')
+              .then(res => res.json())
+              .then(data => {
+                document.getElementById('server-passkey').textContent = data.passkey;
+                console.log('Server passkey loaded:', data.passkey);
+              })
+              .catch(err => {
+                console.error('Error fetching passkey:', err);
+                document.getElementById('server-passkey').textContent = 'Error retrieving passkey';
+              });
 
-          // Listen for sensor data updates
+            // Check network status on page load
+            fetch('/api/network/status')
+              .then(res => res.json())
+              .then(data => {
+                console.log('Network status:', data);
+                updateNetworkStatus(data);
+              })
+              .catch(err => {
+                console.error('Error checking network status:', err);
+                document.getElementById('network-status').innerHTML = 
+                  '🌐 Network Status: <span style="color: #d32f2f;">Error checking status</span>';
+              });
+          }
+
+          function updateNetworkStatus(data) {
+            const statusElement = document.getElementById('network-status');
+            if (data.mqtt_connected) {
+              statusElement.innerHTML = 
+                '🌐 Network Status: <span style="color: #4caf50;">Online (Live data - 5s updates)</span>';
+            } else {
+              statusElement.innerHTML = 
+                '🌐 Network Status: <span style="color: #ff9800;">Offline (Cached data - 10s updates)</span>';
+            }
+          }
+
+          function initializeSocketConnection() {
+            // Enhanced connection event handlers
+            socket.on('connect', () => {
+              console.log('✅ Socket connected successfully');
+              document.getElementById('connect-btn').textContent = 'Connect';
+              document.getElementById('connect-btn').style.backgroundColor = '#4a76a8';
+            });
+
+            // Listen for network status updates
+            socket.on('network_status', (data) => {
+              console.log('Network status update:', data);
+              if (data.status === 'online') {
+                document.getElementById('network-status').innerHTML = 
+                  '🌐 Network Status: <span style="color: #4caf50;">Online (Live data - 5s updates)</span>';
+              } else {
+                document.getElementById('network-status').innerHTML = 
+                  '🌐 Network Status: <span style="color: #ff9800;">Offline (Cached data - 10s updates)</span>';
+              }
+            });
+
+            // Listen for connection status updates
+            socket.on('connection_status', (data) => {
+              console.log('Connection status:', data);
+            });
+
+            // Connect button click handler
+            document.getElementById('connect-btn').addEventListener('click', () => {
+              const passkey = document.getElementById('server-passkey').textContent;
+              if (passkey && passkey !== '(Fetching...)' && passkey !== 'Error retrieving passkey') {
+                console.log('Starting stream with passkey:', passkey);
+                socket.emit('authenticate', { passkey: passkey });
+                
+                document.getElementById('connect-btn').style.display = 'none';
+                document.getElementById('stop-btn').style.display = 'inline-block';
+                document.getElementById('stream-status').style.display = 'block';
+                document.getElementById('stream-status').style.color = '#4caf50';
+              } else {
+                alert('Please wait for passkey to load first.');
+              }
+            });
+
+            // Stop button click handler
+            document.getElementById('stop-btn').addEventListener('click', () => {
+              console.log('Stopping stream');
+              
+              document.getElementById('connect-btn').style.display = 'inline-block';
+              document.getElementById('stop-btn').style.display = 'none';
+              document.getElementById('stream-status').style.display = 'none';
+              
+              // Just emit a stop event instead of disconnecting the socket completely
+              socket.emit('stop_stream');
+            });
+          }
+
+          // Initialize server status and socket connection
+          showServerStatus();
+          initializeSocketConnection();
+
           socket.on('temperature_data', (data) => {
-            console.log('Received sensor data:', data);
-            
-            // Update each room's data
             updateRoomData('living-room', 'Living Room', data);
             updateRoomData('kitchen', 'Kitchen', data);
             updateRoomData('garage', 'Garage', data);
             updateRoomData('basement', 'Basement', data);
           });
 
-          // Update room data and check for alerts
           function updateRoomData(roomId, roomName, data) {
             if (data[roomName]) {
               const roomData = data[roomName];
-              // Update temperature
               document.getElementById(`temp-${roomId}`).textContent = roomData.temperature;
-              // Update humidity
               document.getElementById(`hum-${roomId}`).textContent = roomData.humidity;
-              // Update CO level
               document.getElementById(`co-${roomId}`).textContent = roomData.co_level;
-              // Update timestamp
-              document.getElementById(`time-${roomId}`).textContent = timeAgo(roomData.timestamp);
-              // Check for alerts
-              checkAlerts(roomId, roomData);
+              
+              // If timestamp is old (more than 1 minute ago), use current time for fresh data
+              const timestamp = roomData.timestamp;
+              const now = new Date();
+              const dataTime = new Date(timestamp);
+              const diffMinutes = (now - dataTime) / (1000 * 60);
+              
+              if (diffMinutes > 1) {
+                document.getElementById(`time-${roomId}`).textContent = "Last updated just now";
+              } else {
+                document.getElementById(`time-${roomId}`).textContent = timeAgo(roomData.timestamp);
+              }
+              
+              checkAlerts(roomId, roomName, roomData);
             }
           }
 
-          // Check alerts threshold and display them
-          function checkAlerts(roomId, data) {
+          function checkAlerts(roomId, roomName, data) {
             const alertElement = document.getElementById(`alert-${roomId}`);
             let alerts = [];
             
-            // Check temperature alerts (too hot or too cold)
-            if (data.temperature > 25) {
+            if (data.temperature > settings.temp.max) {
               alerts.push('High Temperature');
-            } else if (data.temperature < 19) {
+              sendNotification(`Temperature ${data.temperature}°C is too high`, roomName);
+            } else if (data.temperature < settings.temp.min) {
               alerts.push('Low Temperature');
+              sendNotification(`Temperature ${data.temperature}°C is too low`, roomName);
             }
             
-            // Check humidity alerts
-            if (data.humidity > 55) {
+            if (data.humidity > settings.humidity.max) {
               alerts.push('High Humidity');
-            } else if (data.humidity < 35) {
+              sendNotification(`Humidity ${data.humidity}% is too high`, roomName);
+            } else if (data.humidity < settings.humidity.min) {
               alerts.push('Low Humidity');
+              sendNotification(`Humidity ${data.humidity}% is too low`, roomName);
             }
             
-            // Check CO level alerts
-            if (data.co_level > 3) {
+            if (data.co_level > settings.co.max) {
               alerts.push('High CO Level');
+              sendNotification(`CO Level ${data.co_level}ppm is dangerous`, roomName);
             }
             
-            // Display alerts
             if (alerts.length > 0) {
               alertElement.textContent = `⚠️ ${alerts.join(', ')}`;
               alertElement.classList.add('active');
@@ -447,15 +802,11 @@
             }
           }
         } else {
-          // Hide avatar and welcome when not logged in
           document.getElementById('header-left').style.display = 'none';
-          document.getElementById('user-avatar').src =
-            "https://ui-avatars.com/api/?name=User&background=4a76a8&color=fff&rounded=true&size=44";
-          document.getElementById('welcome-message').textContent = "Welcome!";
-          document.getElementById('user-info').textContent = '';
           document.getElementById('auth-section').style.display = 'block';
           document.getElementById('main-content').style.display = 'none';
           document.getElementById('sidebar-logout').style.display = 'none';
+          document.getElementById('settings-btn').style.display = 'none';
         }
       })
   </script>
