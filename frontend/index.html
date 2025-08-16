@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Smart Home System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f5f6f7;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+    }
+    .sidebar {
+      width: 70px;
+      background: #294e7a;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 0 0 0;
+      min-height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 200;
+    }
+    .sidebar .nav-icon {
+      font-size: 1.7rem;
+      margin: 1.2rem 0;
+      color: #b0c4de;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .sidebar .nav-icon.active,
+    .sidebar .nav-icon:hover {
+      color: #ff9800;
+    }
+    .sidebar .nav-icon.logout {
+      color: #b0c4de;
+      margin-top: auto;
+      margin-bottom: 2rem;
+      transition: color 0.2s;
+    }
+    .sidebar .nav-icon.logout:hover {
+      color: #ff9800;
+    }
+    .main-content {
+      margin-left: 70px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      background-color: #4a76a8;
+      color: #fff;
+      padding: 1.2rem 2rem 1.2rem 90px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      min-height: 70px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #fff;
+      object-fit: cover;
+      margin-right: 1rem;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(74,118,168,0.08);
+    }
+    .welcome-message {
+      font-size: 1.15rem;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 2rem 1rem 2rem;
+    }
+    .room-card {
+      background: linear-gradient(135deg, #eaf1fb 60%, #fff 100%);
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(74,118,168,0.07);
+      padding: 1.2rem 1rem 1rem 1rem;
+      height: 220px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      transition: box-shadow 0.2s;
+    }
+    .room-title {
+      font-size: 1.2rem;
+      color: #4a76a8;
+      font-weight: bold;
+      margin-bottom: 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .metrics {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 0.7rem;
+    }
+    .metric-label {
+      color: #888;
+      font-size: 0.97rem;
+      margin-right: 0.3rem;
+    }
+    .metric-value {
+      font-weight: bold;
+      font-size: 1.1rem;
+      margin-left: 0.5rem;
+    }
+    .metric-icon {
+      margin-right: 0.4rem;
+      font-size: 1.1rem;
+      vertical-align: middle;
+    }
+    .alert {
+      background: #ffebee;
+      color: #c62828;
+      border-radius: 4px;
+      padding: 0.3rem 0.7rem;
+      font-size: 0.95rem;
+      font-weight: bold;
+      margin-top: 0.5rem;
+      min-height: 1.2rem;
+      transition: opacity 0.3s ease;
+      opacity: 0;
+    }
+    .alert.active {
+      opacity: 1;
+    }
+    .last-updated {
+      color: #888;
+      font-size: 0.93rem;
+      margin-top: 0.3rem;
+      font-style: italic;
+    }
+    .auth-section {
+      margin: 2rem auto;
+      text-align: center;
+      max-width: 600px;
+      padding: 0 2rem;
+    }
+    .welcome-content {
+      margin-bottom: 2.5rem;
+    }
+    .welcome-title {
+      font-size: 2.2rem;
+      color: #294e7a;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    .welcome-subtitle {
+      font-size: 1.3rem;
+      color: #4a76a8;
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+    }
+    .welcome-description {
+      font-size: 1.1rem;
+      color: #666;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+    .feature-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+      text-align: left;
+    }
+    .feature-item {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      border-left: 4px solid #4a76a8;
+    }
+    .feature-icon {
+      color: #4a76a8;
+      margin-right: 0.5rem;
+      font-size: 1.2rem;
+    }
+    .feature-text {
+      color: #333;
+      font-weight: 500;
+    }
+    #google-login-btn {
+      background-color: #4285F4;
+      color: #fff;
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1.1rem;
+      box-shadow: 0 3px 12px rgba(66,133,244,0.15);
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+    }
+    #google-login-btn:hover {
+      background-color: #3367d6;
+    }
+    footer {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      width: 100vw;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #777;
+      padding: 1rem;
+      background: #f5f6f7;
+      z-index: 100;
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.03);
+    }
+    .main-title {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 50%;
+      translate: 0 -50%;
+      margin: 0;
+      font-size: 1.7rem;
+      font-weight: bold;
+      color: #fff;
+      text-align: center;
+      pointer-events: none;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+      <div class="sidebar">
+      <i class="fa-solid fa-gauge nav-icon active" title="Dashboard" onclick="showSection('dashboard')"></i>
+      <i class="fa-solid fa-gear nav-icon" title="Settings" onclick="showSection('settings')"></i>
+      <i class="fa-solid fa-right-from-bracket nav-icon logout" id="sidebar-logout" title="Logout"></i>
+    </div>
+  <div class="main-content">
+    <header>
+      <div class="header-left" id="header-left" style="display: none;">
+        <img src="https://ui-avatars.com/api/?name=User&background=4a76a8&color=fff&rounded=true&size=44" id="user-avatar" class="avatar" alt="User Avatar">
+        <span class="welcome-message" id="welcome-message">Welcome!</span>
+      </div>
+      <h1 class="main-title" style="margin: 0; font-size: 1.7rem; font-weight: bold; color: #fff; text-align: center; flex: 1;">
+        Smart Home System
+      </h1>
+    </header>
+
+    <section class="auth-section" id="auth-section">
+      <div class="welcome-content">
+        <h2 class="welcome-title">Welcome to Smart Home System</h2>
+        <p class="welcome-subtitle">Monitor and control your home environment in real-time</p>
+        <p class="welcome-description">
+          Stay connected to your home with our comprehensive monitoring system. Track temperature, humidity, and air quality across all rooms to ensure your family's comfort and safety.
+        </p>
+      </div>
+      <button id="google-login-btn">
+        <i class="fa-brands fa-google"></i> Login with Google
+      </button>
+      <span id="user-info"></span>
+    </section>
+
+    <main id="main-content" style="display:none;">
+      <!-- Dashboard Section -->
+      <section id="dashboard-section">
+        <div class="dashboard">
+          <div class="room-card" id="card-living-room">
+            <div class="room-title"><i class="fa-solid fa-couch"></i> Living Room</div>
+            <div class="metrics">
+              <div><i class="fa-solid fa-temperature-half metric-icon"></i><span class="metric-label">Temperature:</span> <span class="metric-value" id="temp-living-room">-</span> °C</div>
+              <div><i class="fa-solid fa-droplet metric-icon"></i><span class="metric-label">Humidity:</span> <span class="metric-value" id="hum-living-room">-</span> %</div>
+              <div><i class="fa-solid fa-cloudversify metric-icon"></i><span class="metric-label">CO Level:</span> <span class="metric-value" id="co-living-room">-</span> ppm</div>
+              <div class="last-updated" id="time-living-room">Last updated -</div>
+            </div>
+            <div class="alert" id="alert-living-room"></div>
+          </div>
+          <div class="room-card" id="card-kitchen">
+            <div class="room-title"><i class="fa-solid fa-utensils"></i> Kitchen</div>
+            <div class="metrics">
+              <div><i class="fa-solid fa-temperature-half metric-icon"></i><span class="metric-label">Temperature:</span> <span class="metric-value" id="temp-kitchen">-</span> °C</div>
+              <div><i class="fa-solid fa-droplet metric-icon"></i><span class="metric-label">Humidity:</span> <span class="metric-value" id="hum-kitchen">-</span> %</div>
+              <div><i class="fa-solid fa-cloudversify metric-icon"></i><span class="metric-label">CO Level:</span> <span class="metric-value" id="co-kitchen">-</span> ppm</div>
+              <div class="last-updated" id="time-kitchen">Last updated -</div>
+            </div>
+            <div class="alert" id="alert-kitchen"></div>
+          </div>
+          <div class="room-card" id="card-garage">
+            <div class="room-title"><i class="fa-solid fa-warehouse"></i> Garage</div>
+            <div class="metrics">
+              <div><i class="fa-solid fa-temperature-half metric-icon"></i><span class="metric-label">Temperature:</span> <span class="metric-value" id="temp-garage">-</span> °C</div>
+              <div><i class="fa-solid fa-droplet metric-icon"></i><span class="metric-label">Humidity:</span> <span class="metric-value" id="hum-garage">-</span> %</div>
+              <div><i class="fa-solid fa-cloudversify metric-icon"></i><span class="metric-label">CO Level:</span> <span class="metric-value" id="co-garage">-</span> ppm</div>
+              <div class="last-updated" id="time-garage">Last updated -</div>
+            </div>
+            <div class="alert" id="alert-garage"></div>
+          </div>
+          <div class="room-card" id="card-basement">
+            <div class="room-title"><i class="fa-solid fa-house-flood-water"></i> Basement</div>
+            <div class="metrics">
+              <div><i class="fa-solid fa-temperature-half metric-icon"></i><span class="metric-label">Temperature:</span> <span class="metric-value" id="temp-basement">-</span> °C</div>
+              <div><i class="fa-solid fa-droplet metric-icon"></i><span class="metric-label">Humidity:</span> <span class="metric-value" id="hum-basement">-</span> %</div>
+              <div><i class="fa-solid fa-cloudversify metric-icon"></i><span class="metric-label">CO Level:</span> <span class="metric-value" id="co-basement">-</span> ppm</div>
+              <div class="last-updated" id="time-basement">Last updated -</div>
+            </div>
+            <div class="alert" id="alert-basement"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer>
+      &copy; 25S_CST8922_450 Group 1
+    </footer>
+  </div>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script>
+    // Sidebar logout
+    document.getElementById('sidebar-logout').addEventListener('click', () => {
+      fetch('/logout').then(() => window.location.reload());
+    });
+
+    document.getElementById('google-login-btn').addEventListener('click', () => {
+      window.location.href = '/auth/google?prompt=select_account';
+    });
+
+    // Hide main content until logged in
+    document.getElementById('main-content').style.display = 'none';
+
+    // Greeting based on time of day
+    function getGreeting() {
+      const hour = new Date().getHours();
+      if (hour < 12) return "Good morning";
+      if (hour < 18) return "Good afternoon";
+      return "Good evening";
+    }
+
+    // Convert ISO date to human-readable time difference
+    function timeAgo(isoString) {
+      if (!isoString) return "-";
+      const now = new Date();
+      const then = new Date(isoString);
+      const diff = Math.floor((now - then) / 1000);
+      if (diff < 60) return `Last updated just now`;
+      if (diff < 3600) return `Last updated ${Math.floor(diff/60)} min ago`;
+      if (diff < 86400) return `Last updated ${Math.floor(diff/3600)} hr ago`;
+      return `Last updated ${Math.floor(diff/86400)} day(s) ago`;
+    }
+
+    // User info and socket connection
+    fetch('/api/userinfo')
+      .then(res => res.json())
+      .then(user => {
+        if (user && user.name) {
+          // Show avatar and welcome only when logged in
+          document.getElementById('header-left').style.display = 'flex';
+          document.getElementById('user-avatar').src =
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=4a76a8&color=fff&rounded=true&size=44`;
+          document.getElementById('welcome-message').textContent =
+            `${getGreeting()}, ${user.name}`;
+          document.getElementById('user-info').textContent = '';
+          document.getElementById('auth-section').style.display = 'none';
+          document.getElementById('main-content').style.display = 'block';
+          document.getElementById('sidebar-logout').style.display = 'block';
+
+          const socket = io();
+
+          // Connection status
+          socket.on('connection_status', (data) => {
+            console.log('Connection status:', data);
+          });
+
+          // Listen for sensor data updates
+          socket.on('temperature_data', (data) => {
+            console.log('Received sensor data:', data);
+            
+            // Update each room's data
+            updateRoomData('living-room', 'Living Room', data);
+            updateRoomData('kitchen', 'Kitchen', data);
+            updateRoomData('garage', 'Garage', data);
+            updateRoomData('basement', 'Basement', data);
+          });
+
+          // Update room data and check for alerts
+          function updateRoomData(roomId, roomName, data) {
+            if (data[roomName]) {
+              const roomData = data[roomName];
+              // Update temperature
+              document.getElementById(`temp-${roomId}`).textContent = roomData.temperature;
+              // Update humidity
+              document.getElementById(`hum-${roomId}`).textContent = roomData.humidity;
+              // Update CO level
+              document.getElementById(`co-${roomId}`).textContent = roomData.co_level;
+              // Update timestamp
+              document.getElementById(`time-${roomId}`).textContent = timeAgo(roomData.timestamp);
+              // Check for alerts
+              checkAlerts(roomId, roomData);
+            }
+          }
+
+          // Check alerts threshold and display them
+          function checkAlerts(roomId, data) {
+            const alertElement = document.getElementById(`alert-${roomId}`);
+            let alerts = [];
+            
+            // Check temperature alerts (too hot or too cold)
+            if (data.temperature > 25) {
+              alerts.push('High Temperature');
+            } else if (data.temperature < 19) {
+              alerts.push('Low Temperature');
+            }
+            
+            // Check humidity alerts
+            if (data.humidity > 55) {
+              alerts.push('High Humidity');
+            } else if (data.humidity < 35) {
+              alerts.push('Low Humidity');
+            }
+            
+            // Check CO level alerts
+            if (data.co_level > 3) {
+              alerts.push('High CO Level');
+            }
+            
+            // Display alerts
+            if (alerts.length > 0) {
+              alertElement.textContent = `⚠️ ${alerts.join(', ')}`;
+              alertElement.classList.add('active');
+            } else {
+              alertElement.classList.remove('active');
+            }
+          }
+        } else {
+          // Hide avatar and welcome when not logged in
+          document.getElementById('header-left').style.display = 'none';
+          document.getElementById('user-avatar').src =
+            "https://ui-avatars.com/api/?name=User&background=4a76a8&color=fff&rounded=true&size=44";
+          document.getElementById('welcome-message').textContent = "Welcome!";
+          document.getElementById('user-info').textContent = '';
+          document.getElementById('auth-section').style.display = 'block';
+          document.getElementById('main-content').style.display = 'none';
+          document.getElementById('sidebar-logout').style.display = 'none';
+        }
+      })
+  </script>
+</body>
+</html>
+
+
