@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-08-16T11:53:00.411606",
+  "summary": {
+    "total": 6,
+    "passed": 2,
+    "failed": 2,
+    "skipped": 0
+  },
+  "results": {
+    "unit_tests": {
+      "status": "ERROR",
+      "error": "[Errno 2] No such file or directory: 'python'"
+    },
+    "integration_tests": {
+      "status": "ERROR",
+      "error": "[Errno 2] No such file or directory: 'python'"
+    },
+    "mock_payloads": {
+      "status": "PASSED"
+    },
+    "azure_functions": {
+      "status": "FAILED",
+      "error": "No module named 'azure'"
+    },
+    "notification_system": {
+      "status": "FAILED",
+      "error": "No module named 'vonage'"
+    },
+    "websocket_functionality": {
+      "status": "PASSED"
+    }
+  }
+}

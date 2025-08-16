@@ -398,7 +398,7 @@ if __name__ == '__main__':
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     
-    # Get port from environment variable or use default
+    # Get port from environment variable or use default (5001 to avoid macOS AirPlay on 5000)
     port = int(os.getenv('FLASK_PORT', 5001))
     
     # Connect to MQTT broker - Commented out for now
@@ -408,6 +408,14 @@ if __name__ == '__main__':
     # except Exception as e:
     #     logging.error(f"Failed to connect to MQTT broker: {e}")
     
-    # Run the Flask app with SocketIO - Changed port to 5001 to avoid macOS AirPlay conflict
+    # Run the Flask app with SocketIO
     print(f"🚀 Starting Smart Home Backend on http://localhost:{port}")
-    socketio.run(app, debug=True, host='0.0.0.0', port=port) 
+    try:
+        socketio.run(app, debug=True, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
+    except OSError as e:
+        if "Address already in use" in str(e):
+            print(f"❌ Port {port} is already in use!")
+            print(f"💡 Trying alternative port {port + 1}...")
+            socketio.run(app, debug=True, host='0.0.0.0', port=port + 1, allow_unsafe_werkzeug=True)
+        else:
+            raise 
